@@ -6,7 +6,7 @@ const InputDecorationTheme textFormFieldTheme = InputDecorationTheme(
   enabledBorder: OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(textInputBorderRadius)),
     borderSide: BorderSide(
-      color: Colors.black,
+      color: Colors.grey,
       width: 1,
     ),
   ),

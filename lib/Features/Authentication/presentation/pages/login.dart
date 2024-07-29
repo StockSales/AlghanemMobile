@@ -1,6 +1,10 @@
 import 'dart:developer';
 import 'package:el_ghanem_dot_net/Features/Authentication/data/models/login_model.dart';
 import 'package:el_ghanem_dot_net/Features/Authentication/presentation/bloc/authentication_bloc.dart';
+import 'package:el_ghanem_dot_net/Features/Authentication/presentation/pages/register.dart';
+import 'package:el_ghanem_dot_net/core/extensions/extensions.dart';
+import 'package:el_ghanem_dot_net/core/extensions/text_theme_extensions.dart';
+import 'package:el_ghanem_dot_net/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -46,7 +50,7 @@ class _LoginViewState extends State<LoginView> {
                   height: size.height * 0.4,
                   decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(bottomLeft: Radius.circular(50), bottomRight: Radius.circular(50)), color: AppColors.primaryColor),
-                  child: const Text('الغانم', style: TextStyle(fontSize: 30, color: AppColors.whiteColor))),
+                  child: Text('الغانم', style: context.displaySmall)),
             ),
             const Gap(20),
             // AuthFormField(
@@ -105,12 +109,15 @@ class _LoginViewState extends State<LoginView> {
                     BlocListener<AuthenticationBloc, AuthenticationState>(
                       listener: (context, state) {
                         if (state.loginStatus == LoginStatus.success) {
+                          log(state.loginModel!.userName, name: "login success");
+                          context.navigateTo(const HomeView());
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text("${state.loginModel!.userName} تم تسجيل الدخول بنجاح"),
                             ),
                           );
                         }
+
                         if (state.loginStatus == LoginStatus.failure) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -119,30 +126,51 @@ class _LoginViewState extends State<LoginView> {
                           );
                         }
                       },
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // BlocProvider.of<AuthenticationBloc>(context).add(
-                          //   LoginEvent(loginModel: LoginModel(userName: userNameController.text, password: passwordController.text)),
-                          // );
-                          if (_formKey.currentState!.validate()) {
-                            // Perform login logic here
-                            BlocProvider.of<AuthenticationBloc>(context).add(
-                              LoginEvent(loginModel: LoginModel(userName: userNameController.text, password: passwordController.text)),
-                            );
+                      child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                        builder: (context, state) {
+                          if (state.loginStatus == LoginStatus.loading) {
+                            return const CircularProgressIndicator();
                           }
+                          return ElevatedButton(
+                            onPressed: () {
+                              // BlocProvider.of<AuthenticationBloc>(context).add(
+                              //   LoginEvent(loginModel: LoginModel(userName: userNameController.text, password: passwordController.text)),
+                              // );
+                              if (_formKey.currentState!.validate()) {
+                                // Perform login logic here
+                                BlocProvider.of<AuthenticationBloc>(context).add(
+                                  LoginEvent(loginModel: LoginModel(userName: userNameController.text, password: passwordController.text)),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor,
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50), // Set your desired radius here
+                              ),
+                            ),
+                            child: Text(
+                              'تسجيل الدخول',
+                              style: context.titleMedium,
+                            ),
+                          );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50), // Set your desired radius here
-                          ),
-                        ),
-                        child: const Text(
-                          'تسجيل الدخول',
-                          style: TextStyle(color: Colors.white),
-                        ),
                       ),
+                    ),
+                    const Gap(20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Gap(10),
+                        const Text('ليس لديك حساب؟'),
+                        TextButton(
+                          onPressed: () {
+                            context.navigateTo(const RegistrationForm());
+                          },
+                          child: const Text('انشاء حساب'),
+                        ),
+                      ],
                     ),
                   ],
                 ),

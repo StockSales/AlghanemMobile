@@ -1,11 +1,13 @@
+import 'package:dartz/dartz.dart';
 import 'package:el_ghanem_dot_net/Features/Authentication/data/datasources/remote_datasource.dart';
+import 'package:el_ghanem_dot_net/Features/Authentication/data/datasources/secure_storage.dart';
 import 'package:el_ghanem_dot_net/Features/Authentication/data/models/register_model.dart';
 
 import '../models/login_model.dart';
 
 abstract class AuthRepository {
-  Future<dynamic> login(LoginModel loginModel);
-  Future<dynamic> register(RegisterModel registerModel);
+  Future<Either<Exception, dynamic>> login(LoginModel loginModel);
+  Future<Either<Exception, dynamic>> register(RegisterModel registerModel);
 }
 
 class AuthRepositoryImpl extends AuthRepository {
@@ -13,22 +15,25 @@ class AuthRepositoryImpl extends AuthRepository {
   AuthRepositoryImpl({required this.remoteDatasource});
 
   @override
-  Future<dynamic> login(LoginModel loginModel) async {
+  Future<Either<Exception, dynamic>> login(LoginModel loginModel) async {
     try {
       final response = await remoteDatasource.login(loginModel);
-      return response;
+        // saving token in the flutter_secureStorage
+         SecureStorage.instance.saveToken(response['data']['token']);
+      return Right(response);
     } on Exception catch (e) {
-      return e;
+      return Left(e);
     }
+
   }
 
   @override
-  Future<dynamic> register(RegisterModel registerModel) async {
+  Future<Either<Exception, dynamic>> register(RegisterModel registerModel) async {
     try {
       final response = await remoteDatasource.register(registerModel);
-      return response;
+      return Right(response);
     } on Exception catch (e) {
-      return e;
+      return Left(e);
     }
   }
 }

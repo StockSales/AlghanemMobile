@@ -10,27 +10,30 @@ part 'authentication_state.dart';
 
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   final AuthRepository authRepository;
-  AuthenticationBloc({required this.authRepository})
-      : super(const AuthenticationState().copyWith(registerStatus: RegisterStatus.init, loginStatus: LoginStatus.init)) {
+  AuthenticationBloc({required this.authRepository}) : super(const AuthenticationState()) {
     on<AuthenticationEvent>((event, emit) {});
 
-    on<LoginEvent>((event, emit) {
+    on<LoginEvent>((event, emit) async {
       log(event.loginModel.toString());
       emit(state.copyWith(loginStatus: LoginStatus.loading));
-      authRepository.login(event.loginModel).then((value) {
-        emit(state.copyWith(loginStatus: LoginStatus.success, loginModel: event.loginModel));
-      }).catchError((error) {
+      try {
+        (await authRepository.login(event.loginModel)).fold((l) {
+          emit(state.copyWith(loginStatus: LoginStatus.failure, errorMessage: l.toString()));
+        }, (r) {
+          emit(state.copyWith(loginStatus: LoginStatus.success, loginModel: event.loginModel));
+          state.toString();
+        });
+      } catch (error) {
         emit(state.copyWith(loginStatus: LoginStatus.failure, errorMessage: error.toString()));
-      });
+      }
     });
-
-    on<RegisterEvent>((event, emit) {
+//Omar@123
+    on<RegisterEvent>((event, emit) async {
       emit(state.copyWith(registerStatus: RegisterStatus.loading));
-      authRepository.register(event.registerModel).then((value) {
-        emit(state.copyWith(registerStatus: RegisterStatus.success, registerModel: event.registerModel));
-      }).catchError((error) {
-        emit(state.copyWith(registerStatus: RegisterStatus.failure, errorMessage: error.toString()));
-      });
+      (await authRepository.register(event.registerModel)).fold(
+        (l) => emit(state.copyWith(registerStatus: RegisterStatus.failure, errorMessage: l.toString())),
+        (r) => emit(state.copyWith(registerStatus: RegisterStatus.success, registerModel: event.registerModel)),
+      );
     });
   }
 }

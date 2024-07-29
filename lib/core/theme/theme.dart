@@ -1,3 +1,4 @@
+import 'package:el_ghanem_dot_net/core/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_colors/app_colors.dart';
 import 'FAB_theme.dart';
@@ -17,5 +18,6 @@ final ThemeData lightTheme = ThemeData(
   // bottomNavigationBarTheme: bottomNavBarTheme,
   iconTheme: iconTheme,
   elevatedButtonTheme: elevatedButtonThemeData,
- inputDecorationTheme: textFormFieldTheme,
+  inputDecorationTheme: textFormFieldTheme,
+  textTheme: textTheme,
 );
